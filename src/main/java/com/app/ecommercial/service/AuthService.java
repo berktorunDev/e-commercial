@@ -2,10 +2,13 @@ package com.app.ecommercial.service;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +20,7 @@ import com.app.ecommercial.model.dto.response.AuthenticationResponseDTO;
 import com.app.ecommercial.model.entity.User;
 import com.app.ecommercial.repository.UserRepository;
 import com.app.ecommercial.util.dictionary.ResponseDictionary;
+import com.app.ecommercial.util.handler.GlobalResponseHandler;
 
 import lombok.RequiredArgsConstructor;
 
@@ -75,7 +79,19 @@ public class AuthService {
         throw new InvalidCredentials();
     }
 
-    public String logout(String token) {
-        return jwtService.invalidateToken(token) ? ResponseDictionary.LogoutSuccess : ResponseDictionary.LogoutFail;
+    public String logout(String requestHeader) {
+        try {
+            if (requestHeader != null && requestHeader.startsWith("Bearer ")) {
+                String token = requestHeader.substring(7); // Remove "Bearer " prefix
+                var userId = jwtService.extractUserId(token);
+                var user = userRepository.findById(UUID.fromString(userId)).orElseThrow();
+                user.setLastLogoutDate(new Date());
+                userRepository.save(user);
+                SecurityContextHolder.clearContext();
+            }
+            return ResponseDictionary.LogoutSuccess;
+        } catch (Exception e) {
+            return ResponseDictionary.LogoutFail;
+        }
     }
 }

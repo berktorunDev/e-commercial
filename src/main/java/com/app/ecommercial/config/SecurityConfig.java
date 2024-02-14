@@ -18,9 +18,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.app.ecommercial.config.jwt.JwtAuthFilter;
 import com.app.ecommercial.service.UserService;
 
+import lombok.RequiredArgsConstructor;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
@@ -29,19 +32,19 @@ public class SecurityConfig {
 
     private final PasswordEncoder passwordEncoder;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter, UserService userService, PasswordEncoder passwordEncoder) {
-        this.jwtAuthFilter = jwtAuthFilter;
-        this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private static final String[] WHITE_LIST_URL = {
+            "/api/v1/auth/register",
+            "/api/v1/auth/login",
+            "/api/v1/auth/authenticate",
+            "/api/v1/categories/**"  
+        };
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                        x -> x.requestMatchers("/api/v1/auth/register", "/api/v1/auth/login",
-                                "/api/v1/auth/authenticate")
+                        x -> x.requestMatchers(WHITE_LIST_URL)
                                 .permitAll())
                 .authorizeHttpRequests(x -> x.anyRequest().authenticated())
                 .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

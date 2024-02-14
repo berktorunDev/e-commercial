@@ -32,6 +32,7 @@ public class JwtService {
         claims.put("email", user.getEmail());
         claims.put("phone", user.getPhone());
         claims.put("isVerified", user.isVerified());
+        claims.put("roles", user.getAuthorities());
         return createToken(claims, user.getUsername());
     }
 
@@ -90,22 +91,5 @@ public class JwtService {
     private Key getSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    public boolean invalidateToken(String token) {
-        try {
-            Claims claims = Jwts
-                    .parserBuilder()
-                    .setSigningKey(getSignKey())
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-
-            Date expirationDate = new Date(System.currentTimeMillis() - 1000);
-            claims.setExpiration(expirationDate);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 }

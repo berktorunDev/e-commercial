@@ -46,16 +46,8 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<Object> logout(HttpServletRequest request) {
-        final String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7); // Remove "Bearer " prefix
-
-            var response = authService.logout(token);
-
-            return GlobalResponseHandler.successResponse(HttpStatus.OK, "User logged out successfully", response);
-        }
-
-        return null;
+        var response = authService.logout(request.getHeader("Authorization"));
+        return GlobalResponseHandler.successResponse(HttpStatus.OK, "User logged out successfully", response);
     }
 
 }
