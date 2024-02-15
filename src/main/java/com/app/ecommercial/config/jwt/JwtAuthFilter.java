@@ -9,6 +9,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.app.ecommercial.service.AuthService;
+import com.app.ecommercial.service.RedisService;
 import com.app.ecommercial.service.UserService;
 
 import jakarta.servlet.FilterChain;
@@ -23,6 +25,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserService userService;
+    private final RedisService redisService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -33,6 +36,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String userName = null;
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
+            if (redisService.getValue(token) != null && redisService.getValue(token).equals("BLACK_LISTED")) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Token is blacklisted");
+                return;
+            }
             userName = jwtService.extractUsername(token);
         }
 

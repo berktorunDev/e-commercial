@@ -45,7 +45,7 @@ public class JwtService {
         return userDetails.getUsername().equals(username) && !expirationDate.before(new Date());
     }
 
-    private Date extractExpiration(String token) {
+    public Date extractExpiration(String token) {
         Claims claims = Jwts
                 .parserBuilder()
                 .setSigningKey(getSignKey())

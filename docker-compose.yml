@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_e_commercial
+    environment:
+      POSTGRES_DB: e-commercial_app
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - e-commercial_network
+
+  redis:
+    image: redis:latest
+    container_name: redis_e_commercial
+    command: redis-server /etc/redis/redis.conf
+    volumes:
+      - ./redis.conf:/etc/redis/redis.conf
+      - ./users.acl:/etc/redis/users.acl
+    ports:
+      - "6379:6379"
+    networks:
+      - e-commercial_network
+
+networks:
+  e-commercial_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

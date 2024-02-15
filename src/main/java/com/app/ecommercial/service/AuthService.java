@@ -1,10 +1,8 @@
 package com.app.ecommercial.service;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,8 +18,6 @@ import com.app.ecommercial.model.dto.response.AuthenticationResponseDTO;
 import com.app.ecommercial.model.entity.User;
 import com.app.ecommercial.repository.UserRepository;
 import com.app.ecommercial.util.dictionary.ResponseDictionary;
-import com.app.ecommercial.util.handler.GlobalResponseHandler;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -32,6 +28,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final RedisService redisService;
 
     public AuthenticationResponseDTO authenticate(String username, String password) {
         Authentication authentication = authenticationManager
@@ -87,6 +84,16 @@ public class AuthService {
                 var user = userRepository.findById(UUID.fromString(userId)).orElseThrow();
                 user.setLastLogoutDate(new Date());
                 userRepository.save(user);
+
+                // Calculate remaining time of the token
+                long expirationTime = jwtService.extractExpiration(token).getTime(); // Get expiration time from token
+                long currentTime = System.currentTimeMillis();
+                long ttl = expirationTime - currentTime; // Remaining time in milliseconds
+
+                if (ttl > 0) {
+                    // Blacklist the token in Redis with the remaining TTL
+                    redisService.setValue(token, "BLACK_LISTED", ttl);
+                }
                 SecurityContextHolder.clearContext();
             }
             return ResponseDictionary.LogoutSuccess;
