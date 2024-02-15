@@ -36,8 +36,10 @@ public class SecurityConfig {
             "/api/v1/auth/register",
             "/api/v1/auth/login",
             "/api/v1/auth/authenticate",
-            "/api/v1/categories/**"  
-        };
+            "/api/v1/categories/**",
+            "/swagger-ui/**", 
+            "/v3/api-docs/**"
+    };
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
