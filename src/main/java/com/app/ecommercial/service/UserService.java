@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserService extends BaseService implements UserDetailsService {
+public class UserService extends BaseService<User, UUID> implements UserDetailsService {
 
     private final UserRepository userRepository;
 
@@ -27,8 +27,7 @@ public class UserService extends BaseService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var user = userRepository.findByUsername(username).orElseThrow(EntityNotFoundException::new);
-        return user;
+        return userRepository.findByUsername(username).orElseThrow(EntityNotFoundException::new);
     }
 
 }

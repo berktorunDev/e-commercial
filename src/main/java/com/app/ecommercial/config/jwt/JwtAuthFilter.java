@@ -9,7 +9,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.app.ecommercial.service.AuthService;
 import com.app.ecommercial.service.RedisService;
 import com.app.ecommercial.service.UserService;
 

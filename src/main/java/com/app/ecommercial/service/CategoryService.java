@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class CategoryService extends BaseService {
+public class CategoryService extends BaseService<Category, Long> {
 
     private final CategoryRepository categoryRepository;
 
