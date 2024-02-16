@@ -116,13 +116,13 @@ INSERT INTO categories (id, name, parent_id) VALUES
 -- Kullanıcıları ekle
 INSERT INTO
     users (
-        id, username, email, password, first_name, last_name, phone, account_type, is_verified, created_at, updated_at, account_non_expired, is_enabled, account_non_locked, credentials_non_expired
+        id, username, email, password, first_name, last_name, phone, is_verified, created_at, updated_at, account_non_expired, is_enabled, account_non_locked, credentials_non_expired
     )
 VALUES (
-        '1a46a531-bc88-4f51-a1bb-226ef6beae8e', 'admin_user', 'admin@example.com', '$2a$12$EzorHZDaVB3mq/qgkCgNz.xz0tg.40LmFySO6gxIcuVd/6Wi/Vs8y', 'Admin', 'User', '1234567890', 'admin', true, CURRENT_DATE, CURRENT_DATE, true, true, true, true
+        '1a46a531-bc88-4f51-a1bb-226ef6beae8e', 'admin_user', 'admin@example.com', '$2a$12$EzorHZDaVB3mq/qgkCgNz.xz0tg.40LmFySO6gxIcuVd/6Wi/Vs8y', 'Admin', 'User', '1234567890', true, CURRENT_DATE, CURRENT_DATE, true, true, true, true
     ),
     (
-        '6a7c6e39-3638-4992-b1b8-8374f4eb8b47', 'regular_user', 'user@example.com', '$2a$12$EzorHZDaVB3mq/qgkCgNz.xz0tg.40LmFySO6gxIcuVd/6Wi/Vs8y', 'Regular', 'User', '0987654321', 'user', true, CURRENT_DATE, CURRENT_DATE, true, true, true, true
+        '6a7c6e39-3638-4992-b1b8-8374f4eb8b47', 'regular_user', 'user@example.com', '$2a$12$EzorHZDaVB3mq/qgkCgNz.xz0tg.40LmFySO6gxIcuVd/6Wi/Vs8y', 'Regular', 'User', '0987654321', true, CURRENT_DATE, CURRENT_DATE, true, true, true, true
     );
 
 -- Rolleri ekle

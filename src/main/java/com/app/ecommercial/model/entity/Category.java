@@ -11,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -23,9 +24,12 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @Entity
-@Table(name = "categories")
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "categories", indexes = {
+    @Index(columnList = "parent_id", name = "idx_parent_id"),
+    @Index(columnList = "name", name = "idx_category_name")
+})
 public class Category {
 
     @Id

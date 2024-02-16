@@ -1,6 +1,6 @@
 package com.app.ecommercial.model.entity;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,11 +8,10 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,15 +20,22 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @Entity
-@Table(name = "announcements")
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "announcements", indexes = {
+        @Index(columnList = "user_id", name = "idx_user_id"),
+        @Index(columnList = "category_id", name = "idx_category_id"),
+        @Index(columnList = "title", name = "idx_title"),
+        @Index(columnList = "status", name = "idx_status"),
+        @Index(columnList = "createdAt", name = "idx_createdAt"),
+        @Index(columnList = "updatedAt", name = "idx_updatedAt")
+})
 public class Announcement {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(updatable = false, nullable = false)
-    private Long Id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -51,12 +57,10 @@ public class Announcement {
     @Column(nullable = false)
     private String status;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date creationDate;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updateDate;
-
     @Column(name = "contact_info")
     private String contactInfo;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 }

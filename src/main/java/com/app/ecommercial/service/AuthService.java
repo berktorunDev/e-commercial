@@ -1,11 +1,13 @@
 package com.app.ecommercial.service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,7 +19,11 @@ import com.app.ecommercial.exception.InvalidCredentials;
 import com.app.ecommercial.model.dto.response.AuthenticationResponseDTO;
 import com.app.ecommercial.model.entity.User;
 import com.app.ecommercial.repository.UserRepository;
+import com.app.ecommercial.util.ApplicationUtil;
+import com.app.ecommercial.util.dictionary.ExceptionDictionary;
 import com.app.ecommercial.util.dictionary.ResponseDictionary;
+
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -29,9 +35,14 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final RedisService redisService;
+    private final ApplicationUtil otpGenerator;
+    private final EmailService emailService;
+
+    @Value("${application.otp.expiration}")
+    private int otpExpiration;
 
     public AuthenticationResponseDTO authenticate(String username, String password) {
-        Authentication authentication = authenticationManager
+        var authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
         if (authentication.isAuthenticated()) {
@@ -42,21 +53,20 @@ public class AuthService {
     }
 
     public String register(String username, String email, String password, String firstName,
-            String lastName, String phone, String accountType, boolean isVerified) {
-        String encodedPassword = passwordEncoder.encode(password);
+            String lastName, String phone, boolean isVerified) {
+        var encodedPassword = passwordEncoder.encode(password);
 
-        User user = User.builder()
+        var user = User.builder()
                 .username(username)
                 .email(email)
                 .password(encodedPassword)
                 .firstName(firstName)
                 .lastName(lastName)
                 .phone(phone)
-                .accountType(accountType)
                 .isVerified(isVerified)
                 .build();
 
-        User savedUser = userRepository.save(user);
+        var savedUser = userRepository.save(user);
 
         return ObjectUtils.isEmpty(savedUser) ? ResponseDictionary.UserRegistrationFail
                 : ResponseDictionary.UserRegistrationSuccess;
@@ -64,12 +74,12 @@ public class AuthService {
     }
 
     public AuthenticationResponseDTO login(String username, String password) throws InvalidCredentials {
-        Authentication authentication = authenticationManager
+        var authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
         if (authentication.isAuthenticated()) {
             var user = userRepository.findByUsername(username).orElseThrow();
-            user.setLastLoginDate(new Date());
+            user.setLastLoginDate(LocalDateTime.now());
             userRepository.save(user);
             return AuthenticationResponseDTO.builder().accessToken(jwtService.generateToken(user)).build();
         }
@@ -79,10 +89,10 @@ public class AuthService {
     public String logout(String requestHeader) {
         try {
             if (requestHeader != null && requestHeader.startsWith("Bearer ")) {
-                String token = requestHeader.substring(7); // Remove "Bearer " prefix
+                var token = requestHeader.substring(7); // Remove "Bearer " prefix
                 var userId = jwtService.extractUserId(token);
                 var user = userRepository.findById(UUID.fromString(userId)).orElseThrow();
-                user.setLastLogoutDate(new Date());
+                user.setLastLogoutDate(LocalDateTime.now());
                 userRepository.save(user);
 
                 // Calculate remaining time of the token
@@ -100,5 +110,62 @@ public class AuthService {
         } catch (Exception e) {
             return ResponseDictionary.LogoutFail;
         }
+    }
+
+    public String resetPassword(String email) {
+        try {
+            var user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new EntityNotFoundException(ExceptionDictionary.UserNotFound));
+
+            var otp = otpGenerator.generateOtp();
+            var message = "Verification code: " + otp;
+            emailService.sendSimpleMessage(user.getEmail(), "VERIFICATION CODE", message);
+
+            user.setVerificationCode(otp);
+            user.setVerificationCodeExpiration(LocalDateTime.now().plusMinutes(otpExpiration));
+            user.setUpdatedAt(LocalDateTime.now());
+
+            userRepository.save(user);
+
+            return ResponseDictionary.VerificationCodeSendingSuccess;
+        } catch (Exception e) {
+            return ResponseDictionary.VerificationCodeSendingFail;
+        }
+    }
+
+    public String setPassword(UUID userId, String newPassword) {
+        String passwordPattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,}$";
+        Pattern pattern = Pattern.compile(passwordPattern);
+
+        if (!pattern.matcher(newPassword).matches()) {
+            return ResponseDictionary.PasswordCriteriaFail;
+        }
+
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(ExceptionDictionary.UserNotFound));
+
+        if (user.getPreviousPasswords() != null) {
+            for (String prevPassword : user.getPreviousPasswords()) {
+                if (passwordEncoder.matches(newPassword, prevPassword)) {
+                    return ResponseDictionary.PreviousPasswordUsing;
+                }
+            }
+        }
+
+        String encodedNewPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedNewPassword);
+
+        if (user.getPreviousPasswords() == null) {
+            user.setPreviousPasswords(new ArrayList<>());
+        }
+        user.getPreviousPasswords().add(encodedNewPassword);
+        if (user.getPreviousPasswords().size() > 3) {
+            user.getPreviousPasswords().remove(0);
+        }
+        user.setUpdatedAt(LocalDateTime.now());
+
+        userRepository.save(user);
+
+        return ResponseDictionary.PasswordUpdatedSuccess;
     }
 }

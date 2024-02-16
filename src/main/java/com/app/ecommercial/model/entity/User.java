@@ -1,6 +1,6 @@
 package com.app.ecommercial.model.entity;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -19,12 +19,11 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,9 +33,16 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @Entity
-@Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "users", indexes = {
+        @Index(columnList = "username", name = "idx_username"),
+        @Index(columnList = "email", name = "idx_email"),
+        @Index(columnList = "lastLoginDate", name = "idx_lastLoginDate"),
+        @Index(columnList = "lastLogoutDate", name = "idx_lastLogoutDate"),
+        @Index(columnList = "createdAt", name = "idx_user_createdAt"),
+        @Index(columnList = "updatedAt", name = "idx_user_updatedAt")
+})
 public class User implements UserDetails {
 
     @Id
@@ -60,8 +66,6 @@ public class User implements UserDetails {
 
     private String phone;
 
-    private String accountType;
-
     private boolean isVerified;
 
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
@@ -79,18 +83,6 @@ public class User implements UserDetails {
     @Transient
     private List<String> previousPasswords;
 
-    @Temporal(TemporalType.DATE)
-    private Date lastLoginDate;
-
-    @Temporal(TemporalType.DATE)
-    private Date lastLogoutDate;
-
-    @Temporal(TemporalType.DATE)
-    private Date createdAt;
-
-    @Temporal(TemporalType.DATE)
-    private Date updatedAt;
-
     private boolean accountNonExpired;
 
     private boolean isEnabled;
@@ -99,4 +91,15 @@ public class User implements UserDetails {
 
     private boolean credentialsNonExpired;
 
+    private LocalDateTime lastLoginDate;
+
+    private LocalDateTime lastLogoutDate;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
+    private String verificationCode;
+
+    private LocalDateTime verificationCodeExpiration;
 }
