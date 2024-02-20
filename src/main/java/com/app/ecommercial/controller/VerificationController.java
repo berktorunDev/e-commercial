@@ -23,7 +23,11 @@ public class VerificationController {
 
     @PostMapping()
     public ResponseEntity<Object> verify(@RequestBody VerifyRequestDTO request) {
-        AuthenticationResponseDTO responseDTO = verificationService.verifyOtp(request.getEmail(), request.getOtp());
-        return GlobalResponseHandler.successResponse(HttpStatus.OK, "OTP verified successfully", responseDTO);
+        try {
+            AuthenticationResponseDTO responseDTO = verificationService.verifyOtp(request.getEmail(), request.getOtp());
+            return GlobalResponseHandler.successResponse(HttpStatus.OK, "OTP verified successfully", responseDTO);
+        } catch (Exception e) {
+            return GlobalResponseHandler.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 }

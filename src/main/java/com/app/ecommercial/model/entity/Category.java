@@ -27,11 +27,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "categories", indexes = {
-    @Index(columnList = "parent_id", name = "idx_parent_id"),
-    @Index(columnList = "name", name = "idx_category_name")
+        @Index(columnList = "parent_id", name = "idx_parent_id"),
+        @Index(columnList = "name", name = "idx_category_name")
 })
 public class Category {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(updatable = false, nullable = false)

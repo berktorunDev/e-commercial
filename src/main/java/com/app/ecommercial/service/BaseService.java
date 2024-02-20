@@ -36,4 +36,8 @@ public abstract class BaseService<T, ID> {
         }
         return false;
     }
+
+    public T save(T entity) {
+        return getRepository().save(entity);
+    }
 }

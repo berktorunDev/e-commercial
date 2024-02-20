@@ -1,6 +1,7 @@
 package com.app.ecommercial.model.entity;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -9,7 +10,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.app.ecommercial.model.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -44,7 +48,6 @@ import lombok.NoArgsConstructor;
         @Index(columnList = "updatedAt", name = "idx_user_updatedAt")
 })
 public class User implements UserDetails {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false, nullable = false)
@@ -74,11 +77,14 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Set<Role> authorities;
 
-    @OneToMany(mappedBy = "user")
+    @JsonManagedReference
+    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy = "user")
     private List<Announcement> createdAnnouncements;
 
-    @Transient
-    private List<String> favorites;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_favorites", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "announcement_id")
+    private Set<Long> favorites = new HashSet<>();
 
     @Transient
     private List<String> previousPasswords;

@@ -21,14 +21,14 @@ public class SwaggerConfig {
     }
 
     @Bean
-     OpenAPI customOpenAPI() {
+    OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info().title("API title").version("API version"))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                 .components(new io.swagger.v3.oas.models.Components()
-                    .addSecuritySchemes("bearerAuth", new SecurityScheme()
-                        .type(SecurityScheme.Type.HTTP)
-                        .scheme("bearer")
-                        .bearerFormat("JWT")));
+                        .addSecuritySchemes("bearerAuth", new SecurityScheme()
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")));
     }
 }

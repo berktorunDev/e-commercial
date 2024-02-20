@@ -9,7 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthenticationRequestDTO {
-    private String username;
-    private String password;
+public class CreateAnnouncementRequestDTO {
+    private String title;
+    private String description;
+    private Long categoryId;
+    private double budget;
+    private String phone;
+    private boolean isEnable;
 }

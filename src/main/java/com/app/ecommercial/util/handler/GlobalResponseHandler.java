@@ -6,17 +6,11 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
+@Component
 public class GlobalResponseHandler {
-    /**
-     * Used to create a successful response.
-     *
-     * @param status      HTTP response status (e.g., HttpStatus.OK)
-     * @param infoMessage Informational message to be sent along with the successful
-     *                    response
-     * @param data        Response data
-     * @return A ResponseEntity representing a successful response
-     */
+
     public static ResponseEntity<Object> successResponse(HttpStatus status, String infoMessage, Object data) {
         Map<String, Object> result = new HashMap<>();
 
@@ -31,13 +25,6 @@ public class GlobalResponseHandler {
         return new ResponseEntity<>(result, status);
     }
 
-    /**
-     * Used to create error responses.
-     *
-     * @param status  HTTP response status (e.g., HttpStatus.BAD_REQUEST)
-     * @param message Error message
-     * @return A ResponseEntity representing an error response
-     */
     public static ResponseEntity<Object> errorResponse(HttpStatus status, String errorMessage) {
         // Create a map containing the properties of the error response
         Map<String, Object> result = new HashMap<>();

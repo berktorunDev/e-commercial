@@ -29,28 +29,40 @@ public class UserController {
 
     @GetMapping()
     public ResponseEntity<Object> getUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User userDetails = (User) authentication.getPrincipal();
-        UUID userId = userDetails.getId();
-        var response = userService.getById(userId);
-        return GlobalResponseHandler.successResponse(HttpStatus.OK, "User fetched successfully", response);
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User userDetails = (User) authentication.getPrincipal();
+            UUID userId = userDetails.getId();
+            var response = userService.getById(userId);
+            return GlobalResponseHandler.successResponse(HttpStatus.OK, "User fetched successfully", response);
+        } catch (Exception e) {
+            return GlobalResponseHandler.errorResponse(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
     @PutMapping()
     public ResponseEntity<Object> updateUser(@RequestBody UpdateUserRequestDTO request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User userDetails = (User) authentication.getPrincipal();
-        UUID userId = userDetails.getId();
-        var response = userService.updateUser(userId, request);
-        return GlobalResponseHandler.successResponse(HttpStatus.OK, "User updated successfully", response);
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User userDetails = (User) authentication.getPrincipal();
+            UUID userId = userDetails.getId();
+            var response = userService.updateUser(userId, request);
+            return GlobalResponseHandler.successResponse(HttpStatus.OK, "User updated successfully", response);
+        } catch (Exception e) {
+            return GlobalResponseHandler.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
     @GetMapping("/verify-account")
     public ResponseEntity<Object> verifyAccount() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User userDetails = (User) authentication.getPrincipal();
-        UUID userId = userDetails.getId();
-        var response = userService.verifyAccount(userId);
-        return GlobalResponseHandler.successResponse(HttpStatus.OK, "User updated successfully", response);
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User userDetails = (User) authentication.getPrincipal();
+            UUID userId = userDetails.getId();
+            var response = userService.verifyAccount(userId);
+            return GlobalResponseHandler.successResponse(HttpStatus.OK, "Account verified successfully", response);
+        } catch (Exception e) {
+            return GlobalResponseHandler.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 }

@@ -21,13 +21,22 @@ public class CategoryController {
 
     @GetMapping("/")
     public ResponseEntity<Object> getAllCategories() {
-        var categories = categoryService.getAll();
-        return GlobalResponseHandler.successResponse(HttpStatus.OK, "Categories retrieved successfully", categories);
+        try {
+            var categories = categoryService.getAll();
+            return GlobalResponseHandler.successResponse(HttpStatus.OK, "Categories retrieved successfully",
+                    categories);
+        } catch (Exception e) {
+            return GlobalResponseHandler.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getCategoryById(@PathVariable Long id) {
-        var category = categoryService.getById(id);
-        return GlobalResponseHandler.successResponse(HttpStatus.OK, "Category retrieved successfully", category);
+        try {
+            var category = categoryService.getById(id);
+            return GlobalResponseHandler.successResponse(HttpStatus.OK, "Category retrieved successfully", category);
+        } catch (Exception e) {
+            return GlobalResponseHandler.errorResponse(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 }
