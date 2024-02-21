@@ -31,6 +31,15 @@ public class AuthController {
 
     private final AuthService authService;
 
+    @PostMapping("/ping")
+    public ResponseEntity<Object> ping() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.isAuthenticated()) {
+            return GlobalResponseHandler.successResponse(HttpStatus.OK, "Pong response!!!", authentication);
+        }
+        return GlobalResponseHandler.errorResponse(HttpStatus.UNAUTHORIZED, "CAN NOT PONG!!!");
+    }
+
     @PostMapping("/authenticate")
     public ResponseEntity<Object> authenticate(@RequestBody AuthenticationRequestDTO request) {
         try {
